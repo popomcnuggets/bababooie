@@ -2,6 +2,4 @@
 
 local ElasticHashing = {}
 
-
-
 return ElasticHashing

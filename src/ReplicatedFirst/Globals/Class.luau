@@ -1,12 +1,44 @@
-local function __call()
+--TODO: typechecking
 
-end
+local _specialmethods = {
+    "__new__",
+    "__init__"
+}
+
+local _metamethods = {
+    "__index__",
+    "__newindex__",
+    "__call__",
+    "__concat__",
+    "__unm__",
+    "__add__",
+    "__sub__",
+    "__mul__",
+    "__div__",
+    "__idiv__",
+    "__mod__",
+    "__pow__",
+    "__tostring__",
+    "__metatable__",
+    "__eq__",
+    "__lt__",
+    "__le__",
+    "__mode__",
+    "__gc__",
+    "__len__",
+    "__iter__"
+}
 
 local function class(super)
-    local class = {}
-    class.__call = __call
-    
-    return class
+    local class = super and setmetatable({}, super) or {} --super is no longer a proxy :(
+    local proxy = {} --find a way to freeze proxy
+    proxy.__index = class
+    proxy.__call = class.__init
+    proxy.__newindex = function(table, index, value)
+        class[index] = value
+    end
+
+    return proxy
 end
 
 return class
