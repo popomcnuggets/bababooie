@@ -30,11 +30,13 @@ local _metamethods = {
 }
 
 local function class(super)
-    local class = super and setmetatable({}, super) or {} --super is no longer a proxy :(
-    local proxy = {} --find a way to freeze proxy
-    proxy.__index = class
-    proxy.__call = class.__init
-    proxy.__newindex = function(table, index, value)
+    local class = super and setmetatable({}, super.__class) or {}
+    local proxy = newproxy(true)
+    local metatable = getmetatable(proxy)
+    class.__class = class
+    metatable.__index = class
+    metatable.__call = class.__init
+    metatable.__newindex = function(table, index, value)
         class[index] = value
     end
 
