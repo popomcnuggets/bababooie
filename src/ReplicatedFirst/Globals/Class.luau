@@ -27,7 +27,7 @@ local _metamethods = {
     "__gc__",
     "__len__",
     "__iter__"
-}
+} --hi
 
 local function class(super)
     local class = super and setmetatable({}, super.__class) or {}
