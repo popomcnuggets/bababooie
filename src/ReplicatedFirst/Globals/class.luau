@@ -43,4 +43,18 @@ local function class(super)
     return proxy
 end
 
+local function class(super)
+    local class = {}
+    local proxy = newproxy(true)
+    local proxyMetatable = getmetatable(proxy)
+
+    proxyMetatable.__newindex = function(table, index, value)
+        class[index] = value
+    end
+
+    return proxy
+end
+
+print("hi")
+
 return class
