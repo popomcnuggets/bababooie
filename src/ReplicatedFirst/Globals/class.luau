@@ -11,21 +11,21 @@ local function CreateObjectTable(parentTable)
     return objectTable
 end
 
-local function InitializeClass(super, ...)
-    local class = CreateObjectTable(super)
-    class.proxyMetatable.__call = function(...)
-        if class.__call then
-            class.__call(...)
+local function InitializeClass(class, ...)
+    local classObject = CreateObjectTable(class)
+    classObject.proxyMetatable.__call = function(...)
+        if classObject.table.__call then
+            classObject.table.__call(...)
         end
     end
-    if class.table.__init then
-        class.table.__init(...)
+    if classObject.table.__init then
+        classObject.table.__init(...)
     end
-    return class.proxy
+    return classObject.proxy
 end
 
 local function class(super)
-    local class = CreateObjectTable(super and super.__class)
+    local class = CreateObjectTable(super and getmetatable(super).__class)
     class.proxyMetatable.__call = function(...)
         InitializeClass(class, ...)
     end
