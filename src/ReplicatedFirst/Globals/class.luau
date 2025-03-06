@@ -1,10 +1,9 @@
 local function CreateObjectTable(parentTable)
-    local objectTable = {
-        table = parentTable and setmetatable({}, parentTable) or {},
-        proxy = newproxy(true),
-        metatable = getmetatable(table),
-        proxyMetatable = getmetatable(proxy)
-    }
+    local objectTable = {}
+    objectTable.table = parentTable and setmetatable({}, parentTable) or {}
+    objectTable.proxy = newproxy(true)
+    objectTable.metatable = setmetatable({}, table)
+    objectTable.proxyMetatable = getmetatable(objectTable.proxy)
     objectTable.metatable.__index = parentTable
     objectTable.proxyMetatable.__index = objectTable.table
     objectTable.proxyMetatable.__newindex = objectTable.table
@@ -12,7 +11,7 @@ local function CreateObjectTable(parentTable)
 end
 
 local function InitializeClass(class, ...)
-    local classObject = CreateObjectTable(class)
+    local classObject = CreateObjectTable(class.table)
     classObject.proxyMetatable.__call = function(...)
         if classObject.table.__call then
             classObject.table.__call(...)
@@ -27,7 +26,7 @@ end
 local function class(super)
     local class = CreateObjectTable(super and getmetatable(super).__class)
     class.proxyMetatable.__call = function(...)
-        InitializeClass(class, ...)
+        return InitializeClass(class, ...)
     end
     class.proxyMetatable.__class = class
     return class.proxy
