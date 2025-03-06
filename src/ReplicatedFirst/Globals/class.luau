@@ -1,60 +1,36 @@
---TODO: typechecking
+local function CreateObjectTable(parentTable)
+    local objectTable = {
+        table = parentTable and setmetatable({}, parentTable) or {},
+        proxy = newproxy(true),
+        metatable = getmetatable(table),
+        proxyMetatable = getmetatable(proxy)
+    }
+    objectTable.metatable.__index = parentTable
+    objectTable.proxyMetatable.__index = objectTable.table
+    objectTable.proxyMetatable.__newindex = objectTable.table
+    return objectTable
+end
 
-local _specialmethods = {
-    "__new__",
-    "__init__"
-}
-
-local _metamethods = {
-    "__index__",
-    "__newindex__",
-    "__call__",
-    "__concat__",
-    "__unm__",
-    "__add__",
-    "__sub__",
-    "__mul__",
-    "__div__",
-    "__idiv__",
-    "__mod__",
-    "__pow__",
-    "__tostring__",
-    "__metatable__",
-    "__eq__",
-    "__lt__",
-    "__le__",
-    "__mode__",
-    "__gc__",
-    "__len__",
-    "__iter__"
-}
-
-local function class(super)
-    local class = super and setmetatable({}, super.__class) or {}
-    local proxy = newproxy(true)
-    local metatable = getmetatable(proxy)
-    class.__class = class
-    metatable.__index = class
-    metatable.__call = class.__init
-    metatable.__newindex = function(table, index, value)
-        class[index] = value
+local function InitializeClass(super, ...)
+    local class = CreateObjectTable(super)
+    class.proxyMetatable.__call = function(...)
+        if class.__call then
+            class.__call(...)
+        end
     end
-
-    return proxy
+    if class.table.__init then
+        class.table.__init(...)
+    end
+    return class.proxy
 end
 
 local function class(super)
-    local class = {}
-    local proxy = newproxy(true)
-    local proxyMetatable = getmetatable(proxy)
-
-    proxyMetatable.__newindex = function(table, index, value)
-        class[index] = value
+    local class = CreateObjectTable(super and super.__class)
+    class.proxyMetatable.__call = function(...)
+        InitializeClass(class, ...)
     end
-
-    return proxy
+    class.proxyMetatable.__class = class
+    return class.proxy
 end
-
-print("hi")
 
 return class
